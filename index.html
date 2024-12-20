@@ -1,0 +1,572 @@
+<html><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MediaArchiveX - Descargas Seguras para ti</title>
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: Arial, sans-serif;
+    }
+
+    :root {
+        --primary-color: rgba(0, 119, 255, 0.8);
+        --primary-hover: rgba(0, 85, 204, 0.9);
+        --bg-color: rgba(26, 26, 26, 0.95);
+        --card-bg: rgba(45, 45, 45, 0.7);
+        --text-color: #ffffff;
+        --text-secondary: #b3b3b3;
+        --modal-bg: rgba(0, 0, 0, 0.8);
+        --glass-border: rgba(255, 255, 255, 0.1);
+    }
+
+    body {
+        background: linear-gradient(135deg, #1a1a1a, #2d2d2d);
+        padding: 20px;
+        color: var(--text-color);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .main-content {
+        flex: 1;
+        max-width: calc(100% - 300px);
+    }
+
+    .sidebar {
+        width: 280px;
+        margin-left: 20px;
+        background: var(--card-bg);
+        border-radius: 15px;
+        padding: 20px;
+        backdrop-filter: blur(10px);
+        border: 1px solid var(--glass-border);
+        height: fit-content;
+        position: sticky;
+        top: 20px;
+    }
+
+    .creator-image {
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        margin: 0 auto 20px;
+        display: block;
+        background: var(--card-bg);
+        padding: 3px;
+    }
+
+    .creator-image img {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+
+    .site-description {
+        color: var(--text-secondary);
+        line-height: 1.6;
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    .header {
+        background: var(--primary-color);
+        color: white;
+        padding: 20px;
+        text-align: center;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        backdrop-filter: blur(10px);
+        border: 1px solid var(--glass-border);
+    }
+
+    .files-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 25px;
+        margin: 20px auto;
+    }
+
+    .file-card {
+        background: var(--card-bg);
+        border-radius: 15px;
+        padding: 20px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        transition: all 0.3s ease;
+        border: 1px solid var(--glass-border);
+        backdrop-filter: blur(10px);
+    }
+
+    .file-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+    }
+
+    .file-image {
+        width: 100%;
+        height: 180px;
+        object-fit: cover;
+        border-radius: 10px;
+        margin-bottom: 15px;
+        background: rgba(0,0,0,0.2);
+    }
+
+    .file-name {
+        font-size: 1.2em;
+        font-weight: bold;
+        margin-bottom: 8px;
+        color: var(--text-color);
+    }
+
+    .file-description {
+        color: var(--text-secondary);
+        font-size: 0.95em;
+        margin-bottom: 15px;
+        line-height: 1.4;
+    }
+
+    .download-btn {
+        background: var(--primary-color);
+        color: white;
+        padding: 12px 20px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        width: 100%;
+        transition: all 0.3s ease;
+        font-weight: bold;
+        font-size: 1em;
+    }
+
+    .download-btn:hover {
+        background: var(--primary-hover);
+        transform: scale(1.02);
+    }
+
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: var(--modal-bg);
+        z-index: 1000;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .modal-content {
+        background: var(--card-bg);
+        padding: 30px;
+        border-radius: 15px;
+        max-width: 500px;
+        width: 90%;
+        position: relative;
+        animation: modalOpen 0.3s ease-out;
+    }
+
+    @keyframes modalOpen {
+        from {
+            opacity: 0;
+            transform: scale(0.8);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+
+    .modal-image {
+        width: 100%;
+        height: 250px;
+        object-fit: cover;
+        border-radius: 10px;
+        margin-bottom: 20px;
+    }
+
+    .modal-title {
+        font-size: 1.5em;
+        margin-bottom: 10px;
+    }
+
+    .modal-description {
+        color: var(--text-secondary);
+        margin-bottom: 15px;
+        line-height: 1.6;
+    }
+
+    .modal-filesize {
+        color: var(--primary-color);
+        font-weight: bold;
+        margin-bottom: 20px;
+    }
+
+    .close-modal {
+        position: absolute;
+        right: 15px;
+        top: 15px;
+        background: none;
+        border: none;
+        color: var(--text-color);
+        font-size: 24px;
+        cursor: pointer;
+    }
+
+    .search-container {
+        margin: 20px 0;
+        display: flex;
+        gap: 10px;
+    }
+
+    .search-input {
+        flex: 1;
+        padding: 12px 20px;
+        border: 1px solid var(--glass-border);
+        border-radius: 8px;
+        background: var(--card-bg);
+        color: var(--text-color);
+        font-size: 1em;
+        backdrop-filter: blur(10px);
+    }
+
+    .search-input:focus {
+        outline: none;
+        border-color: var(--primary-color);
+    }
+
+    .search-input::placeholder {
+        color: var(--text-secondary);
+    }
+
+    .copyright {
+        text-align: center;
+        color: var(--text-secondary);
+        padding: 20px;
+        margin-top: 20px;
+        font-size: 0.9em;
+        border-top: 1px solid var(--glass-border);
+    }
+
+    @media (max-width: 1024px) {
+        body {
+            flex-direction: column;
+        }
+        
+        .main-content {
+            max-width: 100%;
+        }
+        
+        .sidebar {
+            width: 100%;
+            margin-left: 0;
+            margin-top: 20px;
+            position: static;
+        }
+        
+        .copyright {
+            margin-top: 40px;
+        }
+    }
+
+    @media (max-width: 600px) {
+        body {
+            padding: 10px;
+        }
+        
+        .files-container {
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+
+        .modal-content {
+            width: 95%;
+            padding: 20px;
+        }
+    }
+
+    .social-buttons {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        z-index: 1000;
+    }
+
+    .social-button {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        border: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: transform 0.3s ease;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    }
+
+    .social-button:hover {
+        transform: scale(1.1);
+    }
+
+    .youtube-btn {
+        background: #FF0000;
+    }
+
+    .tiktok-btn {
+        background: #000000;
+    }
+
+    .social-button svg {
+        width: 30px;
+        height: 30px;
+        fill: white;
+    }
+</style>
+</head>
+<body>
+    <div class="main-content">
+        <div class="header">
+            <h1>MediaArchiveX</h1>
+        </div>
+        
+        <div class="search-container">
+            <input type="text" class="search-input" placeholder="Buscar archivos..." id="searchInput">
+        </div>
+
+        <div class="files-container" id="filesContainer">
+
+        </div>
+    </div>
+
+    <div class="sidebar">
+    <div class="mobile-menu-btn">
+        <div class="menu-line"></div>
+        <div class="menu-line"></div>
+        <div class="menu-line"></div>
+    </div>
+    <div class="sidebar-content">
+        <div class="creator-image">
+            <img src="https://placehold.co/150x150/2d2d2d/white/svg?text=%F0%9F%91%A4" alt="Creator">
+        </div>
+        <p class="site-description">
+            Bienvenido a MediaArchiveX, un espacio diseñado para compartir contenido de manera segura y eficiente. 
+            Esta plataforma está optimizada para ofrecer una experiencia de usuario fluida y agradable, manteniendo un 
+            diseño moderno y minimalista.
+        </p>
+    </div>
+    <style>
+        .sidebar {
+            width: 280px;
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            height: fit-content;
+            position: fixed;
+            right: 20px;
+            top: 20px;
+            transition: transform 0.3s ease;
+            z-index: 100;
+        }
+
+        .mobile-menu-btn {
+            display: none;
+            cursor: pointer;
+            padding: 10px;
+            position: fixed;
+            right: 20px;
+            top: 20px;
+            z-index: 101;
+            background: var(--card-bg);
+            border-radius: 8px;
+        }
+
+        .menu-line {
+            width: 25px;
+            height: 3px;
+            background-color: white;
+            margin: 5px 0;
+            transition: 0.3s;
+        }
+
+        @media (max-width: 1024px) {
+            .sidebar {
+                transform: translateX(100%);
+                width: 100%;
+                max-width: 300px;
+                right: 0;
+                top: 0;
+                height: 100vh;
+                border-radius: 0;
+                margin: 0;
+            }
+
+            .mobile-menu-btn {
+                display: block;
+            }
+
+            .sidebar.active {
+                transform: translateX(0);
+            }
+
+            .mobile-menu-btn.active .menu-line:nth-child(1) {
+                transform: rotate(-45deg) translate(-5px, 6px);
+            }
+
+            .mobile-menu-btn.active .menu-line:nth-child(2) {
+                opacity: 0;
+            }
+
+            .mobile-menu-btn.active .menu-line:nth-child(3) {
+                transform: rotate(45deg) translate(-5px, -6px);
+            }
+        }
+    </style>
+    <script>
+        document.querySelector('.mobile-menu-btn').addEventListener('click', function() {
+            this.classList.toggle('active');
+            document.querySelector('.sidebar').classList.toggle('active');
+        });
+
+        // Cerrar el menú al hacer clic fuera de él
+        document.addEventListener('click', function(event) {
+            const sidebar = document.querySelector('.sidebar');
+            const menuBtn = document.querySelector('.mobile-menu-btn');
+            
+            if (!sidebar.contains(event.target) && !menuBtn.contains(event.target)) {
+                sidebar.classList.remove('active');
+                menuBtn.classList.remove('active');
+            }
+        });
+    </script>
+</div>
+
+    <div class="modal" id="downloadModal">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closeModal()">×</button>
+            <img class="modal-image" id="modalImage">
+            <h2 class="modal-title" id="modalTitle"></h2>
+            <p class="modal-description" id="modalDescription"></p>
+            <p class="modal-filesize" id="modalFilesize"></p>
+            <button class="download-btn">Iniciar Descarga</button>
+        </div>
+    </div>
+
+    <div class="social-buttons">
+        <a href="https://www.youtube.com/@Alexiusss_VC" target="_blank" class="social-button youtube-btn">
+            <svg viewBox="0 0 24 24">
+                <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"></path>
+            </svg>
+        </a>
+        <a href="https://www.tiktok.com/@aalexz_0" target="_blank" class="social-button tiktok-btn">
+            <svg viewBox="0 0 24 24">
+                <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"></path>
+            </svg>
+        </a>
+    </div>
+
+    <div class="copyright">
+        2024 MediaArchiveX. Todos los derechos reservados.
+    </div>
+
+    <script>
+        const files = [{
+            id: 1,
+            name: "Counter Strike Extreme v6",
+            description: "Los jugadores asumen roles de humanos o zombis. Los humanos deben sobrevivir y eliminar a los zombis, mientras que los zombis intentan infectar a los humanos.",
+            fileSize: "740 MB",
+            downloadUrl: "https://huggingface.co/datasets/AlexzBoss/NexaNube-Archivos/resolve/main/Counter%20Strike%20Extreme%20v6%20by%20AlexiusssVC.rar?download=true",
+            image: "https://media.moddb.com/images/downloads/1/48/47312/gamemenuscreens.jpg"
+        }, {
+            id: 2,
+            name: "WinActivator10 - Activador de Windows 10 Global",
+            description: "Software para poder Activar Windows 10 de Manera Fácil y Segura.",
+            fileSize: "1MB GB",
+            downloadUrl: "https://github.com/alexiusvc/WinActivator10",
+            image: "https://img.icons8.com/?size=512&id=108792&format=png"
+        }, {
+            id: 3,
+            name: "WinActivator11 - Activador de Windows 11 Global",
+            description: "Software para poder Activar Windows 10 de Manera Fácil y Segura.",
+            fileSize: "1 MB",
+            downloadUrl: "https://github.com/alexiusvc/WinActivator11",
+            image: "https://preview.redd.it/ne6ukkej06t71.png?auto=webp&s=fbdc1cb1d60306fba3098f7b75a8e01812a97ada"
+        }, {
+            id: 4,
+            name: "Counter-Strike 1.6 Download",
+            description: "Descarga La Versión de Steam de CS 1.6 y Su Versión Ultra Low",
+            fileSize: "320 MB - 100 MB",
+            downloadUrl: "https://alexiusvc.github.io/cs1.6-download/",
+            image: "https://i0.wp.com/imgs.hipertextual.com/wp-content/uploads/2023/02/maxresdefault.jpg?fit=1500%2C844&quality=50&strip=all&ssl=1"
+        }];
+
+        function searchFiles(query) {
+            const normalizedQuery = query.toLowerCase().trim();
+            return files.filter(file => file.name.toLowerCase().includes(normalizedQuery));
+        }
+
+        function handleSearch() {
+            const searchInput = document.getElementById('searchInput');
+            const query = searchInput.value;
+            const filteredFiles = searchFiles(query);
+            renderFiles(filteredFiles);
+        }
+
+        function renderFiles(filesToRender = files) {
+            const container = document.getElementById('filesContainer');
+            container.innerHTML = '';
+            filesToRender.forEach(file => {
+                const fileCard = `
+                    <div class="file-card">
+                        <img src="${file.image}" class="file-image" alt="${file.name}">
+                        <div class="file-name">${file.name}</div>
+                        <div class="file-description">${file.description.substring(0, 100)}...</div>
+                        <button class="download-btn" onclick="showDownloadModal(${file.id})">Descargar</button>
+                    </div>
+                `;
+                container.innerHTML += fileCard;
+            });
+        }
+
+        function showDownloadModal(id) {
+            const file = files.find(f => f.id === id);
+            const modal = document.getElementById('downloadModal');
+            document.getElementById('modalImage').src = file.image;
+            document.getElementById('modalTitle').textContent = file.name;
+            document.getElementById('modalDescription').textContent = file.description;
+            document.getElementById('modalFilesize').textContent = `Tamaño del archivo: ${file.fileSize}`;
+            
+            // Update the download button to use the file's specific URL
+            const downloadBtn = modal.querySelector('.download-btn');
+            downloadBtn.onclick = function() {
+                window.open(file.downloadUrl, '_blank');
+            };
+            
+            modal.style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('downloadModal').style.display = 'none';
+        }
+
+        window.onclick = function (event) {
+            const modal = document.getElementById('downloadModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        };
+
+        document.getElementById('searchInput').addEventListener('input', handleSearch);
+        renderFiles();
+    </script>
+
+</body></html>
